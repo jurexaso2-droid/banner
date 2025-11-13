@@ -1,190 +1,93 @@
-cat > ~/banner.sh << 'EOF'
 #!/bin/bash
+# Custom Termux Banner Script with ASCII Art & Styling
+# Author: GPT-5
 
-# Colors for modern UI
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[1;34m'
-PURPLE='\033[1;35m'
-CYAN='\033[1;36m'
-WHITE='\033[1;37m'
-NC='\033[0m'
+clear
+echo -e "\e[1;32m=========================================="
+echo -e "\e[1;33m     CUSTOM TERMUX BANNER CREATOR"
+echo -e "\e[1;32m=========================================="
+echo ""
 
-# Banner directory
-BANNER_DIR="$HOME/.termux"
-BANNER_FILE="$BANNER_DIR/motd"
-PROP_FILE="$BANNER_DIR/termux.properties"
+# Check dependencies
+pkg install figlet toilet -y > /dev/null 2>&1
 
-show_header() {
-    clear
-    echo -e "${CYAN}"
-    echo "╔══════════════════════════════════════════════╗"
-    echo "║              TERMUX BANNER MANAGER           ║"
-    echo "║                 Easy Setup                   ║"
-    echo "╚══════════════════════════════════════════════╝"
-    echo -e "${NC}"
-}
+echo -e "\e[1;36mEnter your banner text:\e[0m"
+read banner_text
+echo ""
 
-check_dir() {
-    if [ ! -d "$BANNER_DIR" ]; then
-        mkdir -p "$BANNER_DIR"
-        echo -e "${GREEN}[✓] Created directory${NC}"
-    fi
-}
+echo -e "\e[1;36mChoose an ASCII style:\e[0m"
+echo -e "\e[1;33m[1]\e[0m Figlet (simple)"
+echo -e "\e[1;33m[2]\e[0m Toilet (stylish)"
+read -p "Enter number: " ascii_choice
+echo ""
 
-create_banner() {
-    show_header
-    echo -e "${YELLOW}[*] Creating Custom Banner${NC}"
-    echo
-    
-    echo -e "${GREEN}Enter your banner text:${NC}"
-    read -r banner_text
-    
-    if [ -z "$banner_text" ]; then
-        echo -e "${RED}[!] Banner text cannot be empty!${NC}"
-        sleep 2
-        return
-    fi
-    
-    echo -e "${GREEN}Choose banner style:${NC}"
-    echo "1. Simple Text"
-    echo "2. Box Style" 
-    echo "3. Modern Style"
-    echo -n "Select (1-3): "
-    read -r style_choice
-    
-    case $style_choice in
-        1)
-            echo "$banner_text" > "$BANNER_FILE"
-            ;;
-        2)
-            cat > "$BANNER_FILE" << EOB
-╔════════════════════════════════════╗
-║           $banner_text           ║
-╚════════════════════════════════════╝
-EOB
-            ;;
-        3)
-            cat > "$BANNER_FILE" << EOB
-┌────────────────────────────────────┐
-│                                    │
-│           $banner_text           │
-│                                    │
-└────────────────────────────────────┘
-EOB
-            ;;
-        *)
-            echo "$banner_text" > "$BANNER_FILE"
-            ;;
-    esac
-    
-    update_termux_properties
-    
-    echo -e "${GREEN}[✓] Banner created successfully!${NC}"
-    echo -e "${YELLOW}[*] Close and reopen Termux to see your banner${NC}"
-    echo -e "${BLUE}Press any key to continue...${NC}"
-    read -n 1
-}
+echo -e "\e[1;36mChoose a text color:\e[0m"
+echo -e "\e[1;31m[1]\e[0m Red"
+echo -e "\e[1;32m[2]\e[0m Green"
+echo -e "\e[1;33m[3]\e[0m Yellow"
+echo -e "\e[1;34m[4]\e[0m Blue"
+echo -e "\e[1;35m[5]\e[0m Magenta"
+echo -e "\e[1;36m[6]\e[0m Cyan"
+echo -e "\e[1;37m[7]\e[0m White"
+read -p "Enter color number: " color_choice
+echo ""
 
-update_termux_properties() {
-    cat > "$PROP_FILE" << EOP
-# Termux Theme - Modern Dark
-use-black-ui = false
-background = rgba(13, 17, 23, 0.95)
-foreground = #58a6ff
+# Color mapping
+case $color_choice in
+  1) color_code="\e[1;31m" ;;
+  2) color_code="\e[1;32m" ;;
+  3) color_code="\e[1;33m" ;;
+  4) color_code="\e[1;34m" ;;
+  5) color_code="\e[1;35m" ;;
+  6) color_code="\e[1;36m" ;;
+  7) color_code="\e[1;37m" ;;
+  *) color_code="\e[1;37m" ;;
+esac
 
-# Colors
-color_0 = #484f58
-color_1 = #ff7b72
-color_2 = #3fb950
-color_3 = #d29922
-color_4 = #58a6ff
-color_5 = #bc8cff
-color_6 = #39c5cf
-color_7 = #b1bac4
-color_8 = #6e7681
-color_9 = #ffa198
-color_10 = #56d364
-color_11 = #e3b341
-color_12 = #79c0ff
-color_13 = #d2a8ff
-color_14 = #56d4dd
-color_15 = #f0f6fc
+# Text style options
+echo -e "\e[1;36mChoose text style:\e[0m"
+echo -e "[1] Normal"
+echo -e "[2] Bold"
+echo -e "[3] Underline"
+echo -e "[4] Italic (toilet only)"
+read -p "Enter number: " style_choice
+echo ""
 
-# Font
-font = JetBrains Mono
-EOP
-}
+case $style_choice in
+  1) style_code="" ;;
+  2) style_code="\e[1m" ;;
+  3) style_code="\e[4m" ;;
+  4) style_code="\e[3m" ;;
+  *) style_code="" ;;
+esac
 
-remove_banner() {
-    show_header
-    echo -e "${YELLOW}[*] Removing Banner${NC}"
-    
-    if [ -f "$BANNER_FILE" ]; then
-        rm "$BANNER_FILE"
-        echo -e "${GREEN}[✓] Banner removed!${NC}"
-    else
-        echo -e "${RED}[!] No banner found${NC}"
-    fi
-    
-    if [ -f "$PROP_FILE" ]; then
-        rm "$PROP_FILE"
-        echo -e "${GREEN}[✓] Theme reset to default${NC}"
-    fi
-    
-    echo -e "${YELLOW}[*] Close and reopen Termux${NC}"
-    echo -e "${BLUE}Press any key to continue...${NC}"
-    read -n 1
-}
+# Generate ASCII banner preview
+clear
+echo -e "\e[1;32mGenerating preview...\e[0m"
+echo ""
+sleep 1
 
-show_info() {
-    show_header
-    echo -e "${GREEN}Termux Banner Manager${NC}"
-    echo "======================"
-    echo "For beginners - Easy to use!"
-    echo "Files created:"
-    echo "• ~/.termux/motd (banner)"
-    echo "• ~/.termux/termux.properties (theme)"
-    echo
-    echo -e "${BLUE}Press any key to continue...${NC}"
-    read -n 1
-}
+if [ "$ascii_choice" == "1" ]; then
+  figlet "$banner_text"
+else
+  toilet -f bigascii12 "$banner_text"
+fi
 
-main_menu() {
-    while true; do
-        show_header
-        echo -e "${GREEN}Choose option:${NC}"
-        echo
-        echo "1. Create Banner"
-        echo "2. Remove Banner" 
-        echo "3. Info"
-        echo "4. Exit"
-        echo
-        echo -n "Select (1-4): "
-        
-        read -r choice
-        case $choice in
-            1) create_banner ;;
-            2) remove_banner ;;
-            3) show_info ;;
-            4) 
-                echo -e "${GREEN}Thanks for using! Goodbye! 👋${NC}"
-                exit 0 
-                ;;
-            *)
-                echo -e "${RED}Invalid choice! Press any key...${NC}"
-                read -n 1
-                ;;
-        esac
-    done
-}
+echo ""
+read -p "Would you like to set this as your Termux banner? (y/n): " confirm
 
-check_dir
-main_menu
-EOF
-
-# Make it executable
-chmod +x ~/banner.sh
-echo -e "\033[1;32m[✓] Banner script created successfully!\033[0m"
-echo -e "\033[1;36mRun this command to start: ./banner.sh\033[0m"
+if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+  echo "clear" > /data/data/com.termux/files/usr/etc/bash.bashrc
+  echo -e "echo -e '${color_code}${style_code}'" >> /data/data/com.termux/files/usr/etc/bash.bashrc
+  if [ "$ascii_choice" == "1" ]; then
+    echo "figlet \"$banner_text\"" >> /data/data/com.termux/files/usr/etc/bash.bashrc
+  else
+    echo "toilet -f bigascii12 \"$banner_text\"" >> /data/data/com.termux/files/usr/etc/bash.bashrc
+  fi
+  echo -e "echo -e '\e[0m'" >> /data/data/com.termux/files/usr/etc/bash.bashrc
+  clear
+  echo -e "\e[1;32m✅ Custom banner successfully applied!"
+  echo -e "\e[1;33mRestart Termux to see your new look.\e[0m"
+else
+  echo -e "\e[1;31mCancelled.\e[0m"
+fi
